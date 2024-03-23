@@ -1,8 +1,7 @@
+biopython
 jupyter
 matplotlib
-mypy
 numpy
 pandas
-ruff
 scikit-learn
 seaborn
