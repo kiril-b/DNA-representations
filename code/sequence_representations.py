@@ -9,22 +9,35 @@ from matplotlib.axes import Axes
 from sequence_transformations import (
     Transformation,
     TransformationHuffman,
+    TransformationImageGrayscale,
     TransformationRefined,
     TransformationRudimentary,
 )
+import abc
 
 
 class NucleotideMappingMethod(StrEnum):
     RUDIMENTARY = "RUDIMENTARY"
     REFINED = "REFINED"
     HUFFMAN = "HUFFMAN"
+    IMAGE_GRAYSCALE = "IMAGE_GRAYSCALE"
 
 
 class SequenceRepresentation:
+    @abc.abstractmethod
+    def _get_representation(self) -> np.ndarray: ...
+
+    @abc.abstractmethod
+    def plot_representation(
+        self, color: str | None = None, ax: Axes | None = None, **kwargs: Any
+    ) -> Axes: ...
+
+
+class NumericSequenceRepresentation(SequenceRepresentation):
     def __init__(
         self,
         seq: Seq,
-        transformation: Transformation,
+        transformation: Transformation[list[np.ndarray]],
     ) -> None:
         self._transformation = transformation
         self._seq = seq
@@ -64,6 +77,32 @@ class SequenceRepresentation:
         return self._seq
 
 
+class ImageSequenceRepresentation(SequenceRepresentation):
+    def __init__(
+        self,
+        seq: Seq,
+        transformation: Transformation[np.ndarray],
+    ) -> None:
+        self._transformation = transformation
+        self._seq = seq
+        self._representation = self._get_representation()
+    
+    def _get_representation(self) -> np.ndarray:
+        return self._transformation.transform(self._seq)
+
+    def plot_representation(
+        self, color: str | None = None, ax: Axes | None = None, **kwargs: Any
+    ) -> Axes:
+        if ax is None:
+            ax = plt.gca()
+
+        matrix = np.tile(self._representation, (len(self._representation), 1))
+        ax.imshow(matrix, cmap='gray')
+        ax.axis('off')
+
+        return ax
+
+
 class SequenceRepresentationFactory:
     @staticmethod
     def create(
@@ -76,13 +115,13 @@ class SequenceRepresentationFactory:
 
         match mapping_key:
             case NucleotideMappingMethod.RUDIMENTARY:
-                return SequenceRepresentation(
+                return NumericSequenceRepresentation(
                     seq,
                     TransformationRudimentary(),
                 )
 
             case NucleotideMappingMethod.REFINED:
-                return SequenceRepresentation(seq, TransformationRefined())
+                return NumericSequenceRepresentation(seq, TransformationRefined())
 
             case NucleotideMappingMethod.HUFFMAN:
                 if huffman_code_string is None:
@@ -90,9 +129,14 @@ class SequenceRepresentationFactory:
                         "The code string must be provided in order to use HUFFMAN nucleotide mapping method."
                     )
 
-                return SequenceRepresentation(
+                return NumericSequenceRepresentation(
                     seq,
                     TransformationHuffman(huffman_code_string),
+                )
+
+            case NucleotideMappingMethod.IMAGE_GRAYSCALE:
+                return ImageSequenceRepresentation(
+                    seq, TransformationImageGrayscale()
                 )
 
             case _:
