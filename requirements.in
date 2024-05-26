@@ -5,4 +5,8 @@ numpy
 pandas
 scikit-learn
 seaborn
+tensorboard
 torch
+torcheval
+torchvision
+tqdm

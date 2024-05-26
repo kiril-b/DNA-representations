@@ -1,3 +1,4 @@
+import abc
 from enum import StrEnum
 from typing import Any, assert_never
 
@@ -13,7 +14,6 @@ from sequence_transformations import (
     TransformationRefined,
     TransformationRudimentary,
 )
-import abc
 
 
 class NucleotideMappingMethod(StrEnum):
