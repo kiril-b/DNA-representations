@@ -10,3 +10,4 @@ torch
 torcheval
 torchvision
 tqdm
+types-tqdm
