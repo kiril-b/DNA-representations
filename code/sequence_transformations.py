@@ -1,5 +1,6 @@
 import math
 from abc import ABC, abstractmethod
+from typing import override
 
 import numpy as np
 from Bio.Seq import Seq
@@ -11,7 +12,7 @@ class Transformation(ABC):
     def transform(self, x: Seq | str) -> np.ndarray: ...
 
 
-class TransformationRudimentary:
+class TransformationRudimentary(Transformation):
     def __init__(self) -> None:
         self._mapping = {
             "A": (0, -1),
@@ -20,11 +21,12 @@ class TransformationRudimentary:
             "T": (0, 1),
         }
 
+    @override
     def transform(self, seq: Seq | str) -> np.ndarray:
         return np.array([np.array(self._mapping[s]) for s in seq])
 
 
-class TransformationRefined:
+class TransformationRefined(Transformation):
     def __init__(self) -> None:
         self._mapping = {
             "A": (1 / 2, -math.sqrt(3) / 2),
@@ -33,21 +35,23 @@ class TransformationRefined:
             "T": (1 / 2, math.sqrt(3) / 2),
         }
 
+    @override
     def transform(self, seq: Seq | str) -> np.ndarray:
         return np.array([np.array(self._mapping[s]) for s in seq])
 
 
-class TransformationHuffman:
+class TransformationHuffman(Transformation):
     def __init__(self, huffman_code_string: str) -> None:
         self._code = huffman_code(huffman_code_string)
         self._mapping = {"0": (1, -1), "1": (1, 1)}
 
+    @override
     def transform(self, seq: Seq | str) -> np.ndarray:
         encoded_x = encode(str(seq), self._code)
         return np.array([np.array(self._mapping[s]) for s in list(encoded_x)])
 
 
-class TransformationImageGrayscale:
+class TransformationImageGrayscale(Transformation):
     def __init__(self) -> None:
         self._mapping = {
             "A": 0,
@@ -56,5 +60,6 @@ class TransformationImageGrayscale:
             "T": 1,
         }
 
+    @override
     def transform(self, seq: Seq | str) -> np.ndarray:
         return np.array([self._mapping[s] for s in seq])

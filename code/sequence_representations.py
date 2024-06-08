@@ -37,7 +37,7 @@ class NumericSequenceRepresentation(SequenceRepresentation):
     def __init__(
         self,
         seq: Seq,
-        transformation: Transformation[list[np.ndarray]],
+        transformation: Transformation,
     ) -> None:
         self._transformation = transformation
         self._seq = seq
@@ -81,12 +81,12 @@ class ImageSequenceRepresentation(SequenceRepresentation):
     def __init__(
         self,
         seq: Seq,
-        transformation: Transformation[np.ndarray],
+        transformation: Transformation,
     ) -> None:
         self._transformation = transformation
         self._seq = seq
         self._representation = self._get_representation()
-    
+
     def _get_representation(self) -> np.ndarray:
         return self._transformation.transform(self._seq)
 
@@ -97,8 +97,8 @@ class ImageSequenceRepresentation(SequenceRepresentation):
             ax = plt.gca()
 
         matrix = np.tile(self._representation, (len(self._representation), 1))
-        ax.imshow(matrix, cmap='gray')
-        ax.axis('off')
+        ax.imshow(matrix, cmap="gray")
+        ax.axis("off")
 
         return ax
 
@@ -135,9 +135,7 @@ class SequenceRepresentationFactory:
                 )
 
             case NucleotideMappingMethod.IMAGE_GRAYSCALE:
-                return ImageSequenceRepresentation(
-                    seq, TransformationImageGrayscale()
-                )
+                return ImageSequenceRepresentation(seq, TransformationImageGrayscale())
 
             case _:
                 assert_never(mapping_key)
