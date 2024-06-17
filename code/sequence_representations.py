@@ -88,7 +88,8 @@ class ImageSequenceRepresentation(SequenceRepresentation):
         self._representation = self._get_representation()
 
     def _get_representation(self) -> np.ndarray:
-        return self._transformation.transform(self._seq)
+        row = self._transformation.transform(self._seq)
+        return np.tile(row, (len(row) // 5, 1))
 
     def plot_representation(
         self, color: str | None = None, ax: Axes | None = None, **kwargs: Any
@@ -96,8 +97,7 @@ class ImageSequenceRepresentation(SequenceRepresentation):
         if ax is None:
             ax = plt.gca()
 
-        matrix = np.tile(self._representation, (len(self._representation), 1))
-        ax.imshow(matrix, cmap="gray")
+        ax.imshow(self._representation, cmap="gray")
         ax.axis("off")
 
         return ax

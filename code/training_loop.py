@@ -26,14 +26,17 @@ def fit(
     valid_dl: DataLoader,
     writer: SummaryWriter,
     device: torch.device,
+    start_epoch_idx: int = 0,
 ) -> None:
-    for epoch in tqdm(range(epochs)):
+    for epoch in range(epochs):
+        epoch = epoch + start_epoch_idx
+        print(f"Epoch: {epoch}")
         # --- TRAIN ---
         model.train()
 
         losses: list[float] = []
         batch_sizes: list[int] = []
-        for xb, yb in train_dl:
+        for xb, yb in tqdm(train_dl, colour="red"):
             xb: Tensor = xb.to(device)  # type: ignore [no-redef]
             yb: Tensor = yb.to(device)  # type: ignore [no-redef]
             batch_size = len(xb)
@@ -62,7 +65,7 @@ def fit(
             }
             batch_sizes: list[int] = []  # type: ignore [no-redef]
 
-            for xb, yb in valid_dl:
+            for xb, yb in tqdm(valid_dl, colour="green"):
                 xb: Tensor = xb.to(device)  # type: ignore [no-redef]
                 yb: Tensor = yb.to(device)  # type: ignore [no-redef]
 
