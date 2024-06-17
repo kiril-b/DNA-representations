@@ -23,7 +23,8 @@ class TransformationRudimentary(Transformation):
 
     @override
     def transform(self, seq: Seq | str) -> np.ndarray:
-        return np.array([np.array(self._mapping[s]) for s in seq])
+        mapped_seq = np.array([np.array(self._mapping[s]) for s in seq])
+        return np.cumsum(np.array(mapped_seq), axis=0)
 
 
 class TransformationRefined(Transformation):
@@ -37,7 +38,8 @@ class TransformationRefined(Transformation):
 
     @override
     def transform(self, seq: Seq | str) -> np.ndarray:
-        return np.array([np.array(self._mapping[s]) for s in seq])
+        mapped_seq = np.array([np.array(self._mapping[s]) for s in seq])
+        return np.cumsum(np.array(mapped_seq), axis=0)
 
 
 class TransformationHuffman(Transformation):
@@ -48,7 +50,8 @@ class TransformationHuffman(Transformation):
     @override
     def transform(self, seq: Seq | str) -> np.ndarray:
         encoded_x = encode(str(seq), self._code)
-        return np.array([np.array(self._mapping[s]) for s in list(encoded_x)])
+        mapped_seq = np.array([np.array(self._mapping[s]) for s in list(encoded_x)])
+        return np.cumsum(np.array(mapped_seq), axis=0)
 
 
 class TransformationImageGrayscale(Transformation):

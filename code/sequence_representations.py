@@ -44,8 +44,7 @@ class NumericSequenceRepresentation(SequenceRepresentation):
         self._representation = self._get_representation()
 
     def _get_representation(self) -> np.ndarray:
-        transformed_seq = self._transformation.transform(self._seq)
-        return np.cumsum(np.array(transformed_seq), axis=0)
+        return self._transformation.transform(self._seq)
 
     def plot_representation(
         self, color: str | None = None, ax: Axes | None = None, **kwargs: Any
