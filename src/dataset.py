@@ -4,8 +4,9 @@ from typing import Callable, Sequence
 import numpy as np
 import pandas as pd
 import torch
-from preprocessing import min_max_scale_globally
 from torch.utils.data import Dataset
+
+from src.preprocessing import min_max_scale_globally
 
 
 class SequenceDataset(Dataset):

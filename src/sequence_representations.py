@@ -7,7 +7,8 @@ import numpy as np
 import pandas as pd
 from Bio.Seq import Seq
 from matplotlib.axes import Axes
-from sequence_transformations import (
+
+from src.sequence_transformations import (
     Transformation,
     TransformationHuffman,
     TransformationImageGrayscale,
