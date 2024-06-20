@@ -13,7 +13,7 @@ class TransformerEncoderClassifier(nn.Module):
         nhead: int,
         num_layers: int,
         max_seq_length: int,
-        device: int,
+        device: torch.device,
     ) -> None:
         super(TransformerEncoderClassifier, self).__init__()
 

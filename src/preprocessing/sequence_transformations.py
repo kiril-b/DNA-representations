@@ -44,8 +44,8 @@ class TransformationRefined(Transformation):
 
 
 class TransformationHuffman(Transformation):
-    def __init__(self, huffman_code_string: str) -> None:
-        self._code = huffman_code(huffman_code_string)
+    def __init__(self, huffman_code_string: str | Seq) -> None:
+        self._code = huffman_code(str(huffman_code_string))
         self._mapping = {"0": (1, -1), "1": (1, 1)}
 
     @override

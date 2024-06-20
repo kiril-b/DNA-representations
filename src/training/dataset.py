@@ -1,9 +1,10 @@
 import pathlib
-from typing import Callable, Sequence
+from typing import Callable
 
 import numpy as np
 import pandas as pd
 import torch
+from Bio.Seq import Seq
 from torch.utils.data import Dataset
 
 from src.preprocessing.scaling import min_max_scale_globally
@@ -11,7 +12,9 @@ from src.preprocessing.scaling import min_max_scale_globally
 
 class SequenceDataset(Dataset):
     def __init__(
-        self, data_path: pathlib.Path, transformation: Callable[[Sequence], np.ndarray]
+        self,
+        data_path: pathlib.Path,
+        transformation: Callable[[str | Seq], np.ndarray],
     ) -> None:
         # the dataset fits in ram
         data = pd.read_csv(data_path)
