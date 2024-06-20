@@ -1,20 +1,25 @@
 import pathlib
+from typing import Callable, Sequence
 
+import numpy as np
 import pandas as pd
 import torch
-from sequence_transformations import Transformation
+from preprocessing import min_max_scale_globally
 from torch.utils.data import Dataset
 
 
 class SequenceDataset(Dataset):
-    def __init__(self, data_path: pathlib.Path, transformation: Transformation) -> None:
+    def __init__(
+        self, data_path: pathlib.Path, transformation: Callable[[Sequence], np.ndarray]
+    ) -> None:
         data = pd.read_csv(data_path)
+
+        embedded_sequences = data["sequences"].map(transformation).to_numpy()
+        scaled_embedded_sequences = min_max_scale_globally(embedded_sequences)
 
         self.sequences = torch.stack(
             tensors=tuple(
-                data["sequences"]
-                .map(transformation.transform)
-                .map(
+                scaled_embedded_sequences.map(
                     lambda x: torch.tensor(x, requires_grad=False, dtype=torch.float32)
                 )
             )
