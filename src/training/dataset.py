@@ -6,13 +6,14 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from src.preprocessing import min_max_scale_globally
+from src.preprocessing.scaling import min_max_scale_globally
 
 
 class SequenceDataset(Dataset):
     def __init__(
         self, data_path: pathlib.Path, transformation: Callable[[Sequence], np.ndarray]
     ) -> None:
+        # the dataset fits in ram
         data = pd.read_csv(data_path)
 
         embedded_sequences = data["sequences"].map(transformation).to_numpy()

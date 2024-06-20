@@ -5,7 +5,7 @@ from typing import override
 import numpy as np
 from Bio.Seq import Seq
 
-from src.huffman_encoding import encode, huffman_code
+from src.utils.huffman_encoding import encode, huffman_code
 
 
 class Transformation(ABC):

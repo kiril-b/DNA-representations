@@ -15,7 +15,6 @@ class LSTMClassifier(nn.Module):
         self.linear = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x: Tensor) -> Tensor:
-        # Initialize hidden state and cell state with zeros
         h0 = torch.zeros(
             self.num_layers, x.size(0), self.hidden_dim, dtype=torch.float32
         ).to(x.device)
@@ -25,7 +24,7 @@ class LSTMClassifier(nn.Module):
 
         x, _ = self.lstm(x, (h0, c0))  # (B, T, H)
 
-        # Get the last time step's output
+        # get the last time step's output
         x = x[:, -1, :]  # (B, H)
         x = self.linear(x)
         x = F.sigmoid(x)

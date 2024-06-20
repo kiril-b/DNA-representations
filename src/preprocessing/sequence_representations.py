@@ -8,7 +8,7 @@ import pandas as pd
 from Bio.Seq import Seq
 from matplotlib.axes import Axes
 
-from src.sequence_transformations import (
+from src.preprocessing.sequence_transformations import (
     Transformation,
     TransformationHuffman,
     TransformationImageGrayscale,

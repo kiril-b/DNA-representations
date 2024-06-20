@@ -41,6 +41,8 @@ cffi==1.16.0
     # via argon2-cffi-bindings
 charset-normalizer==3.3.2
     # via requests
+click==8.1.7
+    # via typer
 comm==0.2.2
     # via
     #   ipykernel
@@ -167,6 +169,8 @@ kiwisolver==1.4.5
     # via matplotlib
 markdown==3.6
     # via tensorboard
+markdown-it-py==3.0.0
+    # via rich
 markupsafe==2.1.5
     # via
     #   jinja2
@@ -180,6 +184,8 @@ matplotlib-inline==0.1.7
     # via
     #   ipykernel
     #   ipython
+mdurl==0.1.2
+    # via markdown-it-py
 mistune==3.0.2
     # via nbconvert
 mpmath==1.3.0
@@ -300,6 +306,7 @@ pygments==2.18.0
     #   jupyter-console
     #   nbconvert
     #   qtconsole
+    #   rich
 pyparsing==3.1.2
     # via matplotlib
 python-dateutil==2.9.0.post0
@@ -340,6 +347,8 @@ rfc3986-validator==0.1.1
     # via
     #   jsonschema
     #   jupyter-events
+rich==13.7.1
+    # via typer
 rpds-py==0.18.1
     # via
     #   jsonschema
@@ -352,6 +361,8 @@ seaborn==0.13.2
     # via -r requirements.in
 send2trash==1.8.3
     # via jupyter-server
+shellingham==1.5.4
+    # via typer
 six==1.16.0
     # via
     #   asttokens
@@ -416,6 +427,8 @@ traitlets==5.14.3
     #   nbconvert
     #   nbformat
     #   qtconsole
+typer==0.12.3
+    # via -r requirements.in
 types-python-dateutil==2.9.0.20240316
     # via arrow
 types-tqdm==4.66.0.20240417
@@ -424,6 +437,7 @@ typing-extensions==4.12.1
     # via
     #   torch
     #   torcheval
+    #   typer
 tzdata==2024.1
     # via pandas
 uri-template==1.3.0

@@ -17,10 +17,10 @@ class TransformerEncoderClassifier(nn.Module):
     ) -> None:
         super(TransformerEncoderClassifier, self).__init__()
 
-        # Linear layer to project input_dim to d_model
+        # project input_dim to d_model
         self.input_projection = nn.Linear(input_dim, d_model)
 
-        # Precompute fixed positional encodings
+        # precompute fixed positional encodings
         self.positional_encoding = self.generate_positional_encoding(
             max_seq_length, d_model
         ).to(device)
