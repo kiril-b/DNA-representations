@@ -9,6 +9,7 @@ seaborn
 tensorboard
 torch
 torcheval
+torchinfo
 torchvision
 tqdm
 typer

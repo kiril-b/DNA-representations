@@ -6,9 +6,7 @@ from torch import nn
 
 from src.data_models.models import (
     DnaRepresentation,
-    ModelTrainingStates,
     ModelType,
-    TrainingState,
 )
 from src.models.cnn import DNAClassifierCNN
 from src.models.logistic_regression import LogisticRegression
@@ -22,34 +20,27 @@ from src.preprocessing.sequence_transformations import (
 from src.utils.misc import transform_sequence_huffman
 
 
-def get_model_and_train_state(
-    model_type: ModelType, training_states: ModelTrainingStates, device: torch.device
-) -> tuple[nn.Module, TrainingState]:
+def get_model(model_type: ModelType, device: torch.device) -> nn.Module:
     match model_type:
         case ModelType.logistic_regression:
-            return (LogisticRegression(sequence_len=500).to(device), training_states.lr)
+            return LogisticRegression(sequence_len=500).to(device)
         case ModelType.lstm:
-            return (
-                LSTMClassifier(
-                    input_dim=1, hidden_dim=1, output_dim=1, num_layers=1
-                ).to(device),
-                training_states.lstm,
-            )
+            return LSTMClassifier(
+                input_dim=1, hidden_dim=1, output_dim=1, num_layers=1
+            ).to(device)
+
         case ModelType.transformer:
-            return (
-                TransformerEncoderClassifier(
-                    input_dim=2,
-                    d_model=2,
-                    nhead=1,
-                    num_layers=1,
-                    max_seq_length=500,
-                    dim_dense=256,
-                    device=device,
-                ).to(device),
-                training_states.transformer,
-            )
+            return TransformerEncoderClassifier(
+                input_dim=2,
+                d_model=2,
+                nhead=1,
+                num_layers=1,
+                max_seq_length=500,
+                dim_dense=256,
+                device=device,
+            ).to(device)
         case ModelType.cnn:
-            return (DNAClassifierCNN().to(device), training_states.cnn)
+            return DNAClassifierCNN().to(device)
 
 
 def get_transformation_function(

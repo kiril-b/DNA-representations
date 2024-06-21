@@ -404,6 +404,8 @@ torch==2.3.0
     #   torchvision
 torcheval==0.0.7
     # via -r requirements.in
+torchinfo==1.8.0
+    # via -r requirements.in
 torchvision==0.18.0
     # via -r requirements.in
 tornado==6.4
