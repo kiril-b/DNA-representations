@@ -33,17 +33,35 @@ TRAINING_CHECKPOINTS_PATH = "src/logs/checkpoints"
 
 @app.command()
 def start_training(
-    model_type: ModelType,
-    dna_representation: DnaRepresentation,
-    num_epochs: int,
-    learning_rate: float,
-    reset_training: bool,
-    start_epoch_idx: int,
-    checkpoint_id: int,
-    batch_size: int = 64,
-    training_set_size_percentage: float = 0.8,
-    dataset_path: Path = Path(DATASET_PATH),
+    model_type: ModelType = typer.Option(help="The model architecture"),
+    dna_representation: DnaRepresentation = typer.Option(
+        help="The way of encoding the DNA sequences"
+    ),
+    num_epochs: int = typer.Option(help="Number of training epochs"),
+    learning_rate: float = typer.Option(help="Learning rate for the optimizer"),
+    start_epoch_idx: int = typer.Option(
+        help="The index of the initial epoch, if continuing training (useful for logging in tensorboard)"
+    ),
+    checkpoint_id: int = typer.Option(
+        help="The ID of the checkpoint for the current config defined by the model type and dna representation"
+    ),
+    batch_size: int = typer.Option(
+        default=64,
+        help="The number of tensors that get loaded on the device (cpu or gpu) for inference/backprop",
+    ),
+    reset_training: bool = typer.Option(
+        default=False,
+        help="Whether to continue training the model defined by it's model type, dna representation and checkpoint id",
+    ),
+    training_set_size_percentage: float = typer.Option(
+        default=0.8, help="The size of the training set"
+    ),
+    dataset_path: Path = typer.Option(
+        default=Path(DATASET_PATH),
+        help="The path of the preprocessed dataset containing the DNA sequences as strings",
+    ),
 ) -> None:
+    logger.info(reset_training)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     logger.info(f"Device set to: {str(device)}")
 
@@ -76,7 +94,7 @@ def start_training(
     )
     writer.add_text(
         tag="model_architecture",
-        text_string=f"```{model_architecture_str(model)}```",
+        text_string=f"```{model_architecture_str(model=model, model_type=model_type, batch_size=batch_size)}```",
     )
 
     fit(
