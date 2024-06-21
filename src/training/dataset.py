@@ -5,9 +5,10 @@ import numpy as np
 import pandas as pd
 import torch
 from Bio.Seq import Seq
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset, random_split
 
 from src.preprocessing.scaling import min_max_scale_globally
+from src.preprocessing.sequence_transformations import DNA
 
 
 class SequenceDataset(Dataset):
@@ -45,3 +46,21 @@ class SequenceDataset(Dataset):
 
     def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
         return self.sequences[idx], self.classes[idx]
+
+
+def load_data(
+    batch_size: int,
+    training_set_size_percentage: float,
+    dataset_path: pathlib.Path,
+    seq_transformation: Callable[[DNA], np.ndarray],
+) -> tuple[DataLoader, DataLoader]:
+    dataset = SequenceDataset(dataset_path, seq_transformation)
+    train_size = int(training_set_size_percentage * len(dataset))
+    val_size = len(dataset) - train_size
+    train_dataset, val_dataset = random_split(
+        dataset,
+        [train_size, val_size],
+    )
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=(batch_size * 2), shuffle=False)
+    return train_loader, val_loader

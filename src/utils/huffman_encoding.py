@@ -4,6 +4,7 @@ from collections import Counter
 from typing_extensions import Self
 
 
+
 class Node:
     def __init__(self, left: Self, right: Self):
         self.left = left
@@ -13,12 +14,14 @@ class Node:
         self.left.walk(code, acc + "0")
         self.right.walk(code, acc + "1")
 
+
 class Leaf(Node):
     def __init__(self, char: str):
         self.char = char
 
     def walk(self, code: dict[str, str], acc: str) -> None:
         code[self.char] = acc or "0"
+
 
 def huffman_code(string: str) -> dict[str, str]:
     h: list[tuple[int, int, Node]] = []
@@ -40,6 +43,7 @@ def huffman_code(string: str) -> dict[str, str]:
         [(_freq, _count, root)] = h
         root.walk(code, "")
     return code
+
 
 def encode(string: str, code: dict[str, str]) -> str:
     return "".join(code[ch] for ch in string)

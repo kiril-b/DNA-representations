@@ -7,10 +7,12 @@ from Bio.Seq import Seq
 
 from src.utils.huffman_encoding import encode, huffman_code
 
+DNA = Seq | str
+
 
 class Transformation(ABC):
     @abstractmethod
-    def transform(self, x: Seq | str) -> np.ndarray: ...
+    def transform(self, x: DNA) -> np.ndarray: ...
 
 
 class TransformationRudimentary(Transformation):
@@ -23,7 +25,7 @@ class TransformationRudimentary(Transformation):
         }
 
     @override
-    def transform(self, seq: Seq | str) -> np.ndarray:
+    def transform(self, seq: DNA) -> np.ndarray:
         mapped_seq = np.array([np.array(self._mapping[s]) for s in seq])
         return np.cumsum(np.array(mapped_seq), axis=0)
 
@@ -38,7 +40,7 @@ class TransformationRefined(Transformation):
         }
 
     @override
-    def transform(self, seq: Seq | str) -> np.ndarray:
+    def transform(self, seq: DNA) -> np.ndarray:
         mapped_seq = np.array([np.array(self._mapping[s]) for s in seq])
         return np.cumsum(np.array(mapped_seq), axis=0)
 
@@ -49,7 +51,7 @@ class TransformationHuffman(Transformation):
         self._mapping = {"0": (1, -1), "1": (1, 1)}
 
     @override
-    def transform(self, seq: Seq | str) -> np.ndarray:
+    def transform(self, seq: DNA) -> np.ndarray:
         encoded_x = encode(str(seq), self._code)
         mapped_seq = np.array([np.array(self._mapping[s]) for s in list(encoded_x)])
         return np.cumsum(np.array(mapped_seq), axis=0)
@@ -65,5 +67,5 @@ class TransformationImageGrayscale(Transformation):
         }
 
     @override
-    def transform(self, seq: Seq | str) -> np.ndarray:
+    def transform(self, seq: DNA) -> np.ndarray:
         return np.array([self._mapping[s] for s in seq])

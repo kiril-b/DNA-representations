@@ -3,6 +3,7 @@ jupyter
 matplotlib
 numpy
 pandas
+pydantic
 scikit-learn
 seaborn
 tensorboard

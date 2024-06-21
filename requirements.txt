@@ -6,6 +6,8 @@
 #
 absl-py==2.1.0
     # via tensorboard
+annotated-types==0.7.0
+    # via pydantic
 anyio==4.4.0
     # via
     #   httpx
@@ -300,6 +302,10 @@ pure-eval==0.2.2
     # via stack-data
 pycparser==2.22
     # via cffi
+pydantic==2.7.4
+    # via -r requirements.in
+pydantic-core==2.18.4
+    # via pydantic
 pygments==2.18.0
     # via
     #   ipython
@@ -435,6 +441,8 @@ types-tqdm==4.66.0.20240417
     # via -r requirements.in
 typing-extensions==4.12.1
     # via
+    #   pydantic
+    #   pydantic-core
     #   torch
     #   torcheval
     #   typer

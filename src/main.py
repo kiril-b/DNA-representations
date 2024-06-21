@@ -1,24 +1,22 @@
 import logging
-from enum import StrEnum
 from pathlib import Path
 
-import numpy as np
 import torch
+import torch.nn.functional as F
+import torch.optim as optim
 import typer
-from Bio.Seq import Seq
-from torch import nn
-from torch.utils.data import DataLoader, random_split
+from torch.utils.tensorboard import SummaryWriter
 
-from src.models.cnn import DNAClassifierCNN
-from src.models.logistic_regression import LogisticRegression
-from src.models.lstm import LSTMClassifier
-from src.models.transformer import TransformerEncoderClassifier
-from src.preprocessing.sequence_transformations import (
-    TransformationHuffman,
-    TransformationImageGrayscale,
-    TransformationRefined,
+from src.data_models.models import DnaRepresentation, ModelType
+from src.training.dataset import load_data
+from src.training.training_loop import fit
+from src.utils.factories import get_model_and_train_state, get_transformation_function
+from src.utils.misc import count_trainable_parameters
+from src.utils.training_states import (
+    dump_training_states,
+    init_training_states,
+    load_training_states,
 )
-from src.training.dataset import SequenceDataset
 
 torch.manual_seed(23)
 
@@ -32,25 +30,9 @@ logger = logging.getLogger(__name__)
 app = typer.Typer()
 
 
-class ModelType(StrEnum):
-    cnn = "cnn"
-    lstm = "lstm"
-    transformer = "transformer"
-    logistic_regression = "logistic_regression"
-
-
-class DnaRepresentation(StrEnum):
-    refined = "refined"
-    huffman = "huffman"
-    grayscale = "grayscale"
-
-
-def transform_sequence_huffman(seq: Seq | str) -> np.ndarray:
-    return TransformationHuffman(seq).transform(seq)
-
-
-def count_trainable_parameters(model: nn.Module) -> int:
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+DATASET_PATH = "data/classification/data.csv"
+TENSORBOARD_LOGS_PATH = "src/logs/tensorboard"
+TRAINING_CHECKPOINTS_PATH = "src/logs/checkpoints"
 
 
 @app.command()
@@ -59,55 +41,70 @@ def start_training(
     dna_representation: DnaRepresentation,
     num_epochs: int,
     learning_rate: float,
+    reset_training: bool,
     batch_size: int = 64,
     training_set_size_percentage: float = 0.8,
-    dataset_path: Path = Path("data/classification/data.csv"),
+    dataset_path: Path = Path(DATASET_PATH),
 ) -> None:
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     logger.info(f"Device set to: {str(device)}")
 
-    match dna_representation:
-        case DnaRepresentation.refined:
-            seq_transformation = TransformationRefined().transform
-        case DnaRepresentation.huffman:
-            seq_transformation = transform_sequence_huffman
-        case DnaRepresentation.grayscale:
-            seq_transformation = TransformationImageGrayscale().transform
-
-    model: nn.Module
-    match model_type:
-        case ModelType.logistic_regression:
-            model = LogisticRegression(sequence_len=500).to(device)
-        case ModelType.lstm:
-            model = LSTMClassifier(
-                input_dim=1, hidden_dim=1, output_dim=1, num_layers=1
-            )
-            pass
-        case ModelType.transformer:
-            model = TransformerEncoderClassifier(
-                input_dim=2,
-                d_model=2,
-                nhead=1,
-                num_layers=1,
-                max_seq_length=500,
-                dim_dense=256,
-                device=device,
-            ).to(device)
-        case ModelType.cnn:
-            model = DNAClassifierCNN().to(device)
-
+    training_states = load_training_states()
+    seq_transformation = get_transformation_function(dna_representation)
+    model, train_state = get_model_and_train_state(model_type, training_states, device)
     logger.info(f"Number of trainable parameters: {count_trainable_parameters(model)}")
 
-    dataset = SequenceDataset(dataset_path, seq_transformation)
-    train_size = int(training_set_size_percentage * len(dataset))
-    val_size = len(dataset) - train_size
-    train_dataset, val_dataset = random_split(
-        dataset,
-        [train_size, val_size],
+    opt = optim.Adam(model.parameters(), lr=learning_rate)
+
+    start_epoch_idx = train_state.start_epoch_idx if not reset_training else 0
+    cid = train_state.run_id if not reset_training else train_state.run_id + 1
+    checkpoint_path = Path(
+        f"{TRAINING_CHECKPOINTS_PATH}/{model_type}/{dna_representation}/checkopoint_{cid}.pt"
     )
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=(batch_size * 2), shuffle=False)
+
+    if not checkpoint_path.parent.is_dir():
+        checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if checkpoint_path.exists() and not reset_training:
+        logger.info("Loading the pretrained model from disk...")
+        checkpoint = torch.load(checkpoint_path, map_location=device)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        opt = optim.Adam(model.parameters())
+        opt.load_state_dict(checkpoint["optimizer_state_dict"])
+
+    train_loader, val_loader = load_data(
+        batch_size, training_set_size_percentage, dataset_path, seq_transformation
+    )
+
+    writer = SummaryWriter(
+        f"{TENSORBOARD_LOGS_PATH}/{model_type}/{dna_representation}/log_{cid}"
+    )
+    fit(
+        epochs=num_epochs,
+        model=model,
+        loss_func=F.binary_cross_entropy,
+        opt=opt,
+        train_dl=train_loader,
+        valid_dl=val_loader,
+        writer=writer,
+        device=device,
+        start_epoch_idx=start_epoch_idx,
+    )
+    writer.flush()
+
+    torch.save(
+        {
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": opt.state_dict(),
+        },
+        checkpoint_path,
+    )
+
+    train_state.start_epoch_idx = start_epoch_idx + num_epochs
+    train_state.run_id = cid
+    dump_training_states(training_states)
 
 
 if __name__ == "__main__":
+    init_training_states()
     app()

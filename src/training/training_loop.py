@@ -22,7 +22,7 @@ def fit(
     valid_dl: DataLoader,
     writer: SummaryWriter,
     device: torch.device,
-    start_epoch_idx: int = 0,
+    start_epoch_idx: int,
 ) -> None:
     for epoch in range(epochs):
         epoch = epoch + start_epoch_idx
