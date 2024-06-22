@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, assert_never
 
 import numpy as np
 import torch
@@ -8,39 +8,33 @@ from src.data_models.models import (
     DnaRepresentation,
     ModelType,
 )
-from src.models.cnn import DNAClassifierCNN
+from src.models.cnn import CnnClassifier
 from src.models.logistic_regression import LogisticRegression
-from src.models.lstm import LSTMClassifier
+from src.models.lstm import LstmClassifier
 from src.models.transformer import TransformerEncoderClassifier
 from src.preprocessing.sequence_transformations import (
     DNA,
     TransformationImageGrayscale,
     TransformationRefined,
+    TransformationRudimentary,
 )
 from src.utils.misc import transform_sequence_huffman
 
 
-def get_model(model_type: ModelType, device: torch.device) -> nn.Module:
+def get_model(
+    model_type: ModelType, sequence_len: int, device: torch.device
+) -> nn.Module:
     match model_type:
         case ModelType.logistic_regression:
-            return LogisticRegression(sequence_len=500).to(device)
+            return LogisticRegression(sequence_len=sequence_len).to(device)
         case ModelType.lstm:
-            return LSTMClassifier(
-                input_dim=1, hidden_dim=1, output_dim=1, num_layers=1
-            ).to(device)
-
+            return LstmClassifier().to(device)
         case ModelType.transformer:
             return TransformerEncoderClassifier(
-                input_dim=2,
-                d_model=2,
-                nhead=1,
-                num_layers=1,
-                max_seq_length=500,
-                dim_dense=256,
-                device=device,
+                max_seq_length=sequence_len, device=device
             ).to(device)
         case ModelType.cnn:
-            return DNAClassifierCNN().to(device)
+            return CnnClassifier().to(device)
 
 
 def get_transformation_function(
@@ -48,9 +42,12 @@ def get_transformation_function(
 ) -> Callable[[DNA], np.ndarray]:
     match dna_representation:
         case DnaRepresentation.refined:
-            seq_transformation = TransformationRefined().transform
+            return TransformationRefined().transform
         case DnaRepresentation.huffman:
-            seq_transformation = transform_sequence_huffman
+            return transform_sequence_huffman
         case DnaRepresentation.grayscale:
-            seq_transformation = TransformationImageGrayscale().transform
-    return seq_transformation
+            return TransformationImageGrayscale().transform
+        case DnaRepresentation.rudimentary:
+            return TransformationRudimentary().transform
+        case _:
+            assert_never(dna_representation)

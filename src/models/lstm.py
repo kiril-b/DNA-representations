@@ -2,12 +2,21 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
+INPUT_DIM = 2
+HIDDEN_DIM = 6
+OUTPUT_DIM = 1
+NUM_LAYERS = 1
 
-class LSTMClassifier(nn.Module):
+
+class LstmClassifier(nn.Module):
     def __init__(
-        self, input_dim: int, hidden_dim: int, output_dim: int, num_layers: int
+        self,
+        input_dim: int = INPUT_DIM,
+        hidden_dim: int = HIDDEN_DIM,
+        output_dim: int = OUTPUT_DIM,
+        num_layers: int = NUM_LAYERS,
     ) -> None:
-        super(LSTMClassifier, self).__init__()
+        super(LstmClassifier, self).__init__()
         self.hidden_dim = hidden_dim
         self.num_layers = num_layers
 

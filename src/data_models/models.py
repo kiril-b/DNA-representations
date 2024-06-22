@@ -11,6 +11,7 @@ class ModelType(StrEnum):
 
 
 class DnaRepresentation(StrEnum):
+    rudimentary = "rudimentary"
     refined = "refined"
     huffman = "huffman"
     grayscale = "grayscale"

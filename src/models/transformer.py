@@ -3,17 +3,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
+INPUT_DIM = 2
+D_MODEL = 6
+NHEAD = 3
+NUM_LAYERS = 1
+DIM_DNESE = 256
+
 
 class TransformerEncoderClassifier(nn.Module):
     def __init__(
         self,
-        input_dim: int,
-        dim_dense: int,
-        d_model: int,
-        nhead: int,
-        num_layers: int,
         max_seq_length: int,
         device: torch.device,
+        input_dim: int = INPUT_DIM,
+        d_model: int = D_MODEL,
+        dim_dense: int = DIM_DNESE,
+        nhead: int = NHEAD,
+        num_layers: int = NUM_LAYERS,
     ) -> None:
         super(TransformerEncoderClassifier, self).__init__()
 

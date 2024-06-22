@@ -11,8 +11,12 @@ from torch.utils.tensorboard import SummaryWriter
 from src.data_models.models import DnaRepresentation, ModelType
 from src.training.dataset import load_data
 from src.training.training_loop import fit
-from src.utils.factories import get_model, get_transformation_function
-from src.utils.misc import count_trainable_parameters, model_architecture_str
+from src.utils.factories import get_model
+from src.utils.misc import (
+    count_trainable_parameters,
+    get_sequences_path,
+    model_architecture_str,
+)
 
 torch.manual_seed(23)
 
@@ -26,7 +30,8 @@ logger = logging.getLogger(__name__)
 app = typer.Typer()
 
 
-DATASET_PATH = "data/classification/data.csv"
+DATA_PATH = "data/classification"
+TENSOR_CLASSES_FILE_NAME = "tensor_classes.pt"
 TENSORBOARD_LOGS_PATH = "src/logs/tensorboard"
 TRAINING_CHECKPOINTS_PATH = "src/logs/checkpoints"
 
@@ -56,17 +61,18 @@ def start_training(
     training_set_size_percentage: float = typer.Option(
         default=0.8, help="The size of the training set"
     ),
-    dataset_path: Path = typer.Option(
-        default=Path(DATASET_PATH),
-        help="The path of the preprocessed dataset containing the DNA sequences as strings",
+    classes_path: Path = typer.Option(
+        default=Path(f"{DATA_PATH}/{TENSOR_CLASSES_FILE_NAME}"),
+        help="The path of the stored tensor that contains the classes",
     ),
 ) -> None:
     logger.info(reset_training)
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     logger.info(f"Device set to: {str(device)}")
 
-    seq_transformation = get_transformation_function(dna_representation)
-    model: nn.Module = get_model(model_type, device)
+    sequence_len = 1000 if dna_representation == DnaRepresentation.huffman else 500
+
+    model: nn.Module = get_model(model_type, sequence_len, device)
     logger.info(f"Number of trainable parameters: {count_trainable_parameters(model)}")
 
     opt = optim.Adam(model.parameters(), lr=learning_rate)
@@ -85,16 +91,23 @@ def start_training(
         opt = optim.Adam(model.parameters())
         opt.load_state_dict(checkpoint["optimizer_state_dict"])
 
+    logger.info("Loading the dataset in memory...")
     train_loader, val_loader = load_data(
-        batch_size, training_set_size_percentage, dataset_path, seq_transformation
+        sequences_path=get_sequences_path(
+            data_path=Path(DATA_PATH), dna_representation=dna_representation
+        ),
+        classes_path=classes_path,
+        batch_size=batch_size,
+        training_set_size_percentage=training_set_size_percentage,
     )
 
     writer = SummaryWriter(
         f"{TENSORBOARD_LOGS_PATH}/{model_type}/{dna_representation}/log_{checkpoint_id}"
     )
+
     writer.add_text(
         tag="model_architecture",
-        text_string=f"```{model_architecture_str(model=model, model_type=model_type, batch_size=batch_size)}```",
+        text_string=f"```{model_architecture_str(model=model, model_type=model_type, batch_size=batch_size, sequence_len=sequence_len)}```",
     )
 
     fit(

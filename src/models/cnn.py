@@ -2,9 +2,9 @@ import torch.nn as nn
 from torch import Tensor
 
 
-class DNAClassifierCNN(nn.Module):
+class CnnClassifier(nn.Module):
     def __init__(self) -> None:
-        super(DNAClassifierCNN, self).__init__()
+        super(CnnClassifier, self).__init__()
 
         layers: list[nn.Module] = []  # conv layers, activations and pooling
         in_channels = 1  # the images are 1D
