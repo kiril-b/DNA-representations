@@ -6,8 +6,8 @@ from torch import Tensor
 INPUT_DIM = 2
 D_MODEL = 6
 NHEAD = 3
-NUM_LAYERS = 1
-DIM_DNESE = 256
+NUM_LAYERS = 3
+DIM_DNESE = 128
 
 
 class TransformerEncoderClassifier(nn.Module):

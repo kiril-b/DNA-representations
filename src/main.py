@@ -120,17 +120,10 @@ def start_training(
         writer=writer,
         device=device,
         start_epoch_idx=start_epoch_idx,
+        checkpoint_path=checkpoint_path,
     )
     writer.flush()
     writer.close()
-
-    torch.save(
-        {
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": opt.state_dict(),
-        },
-        checkpoint_path,
-    )
 
 
 if __name__ == "__main__":

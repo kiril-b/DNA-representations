@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Callable
 
 import torch
@@ -23,6 +24,7 @@ def fit(
     writer: SummaryWriter,
     device: torch.device,
     start_epoch_idx: int,
+    checkpoint_path: Path,
 ) -> None:
     for epoch in range(epochs):
         epoch = epoch + start_epoch_idx
@@ -83,3 +85,11 @@ def fit(
                 batch_sizes=batch_sizes,
                 dataset="val",
             )
+
+        torch.save(
+            {
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": opt.state_dict(),
+            },
+            checkpoint_path,
+        )

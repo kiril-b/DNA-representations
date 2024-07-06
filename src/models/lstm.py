@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch import Tensor, nn
 
 INPUT_DIM = 2
-HIDDEN_DIM = 6
+HIDDEN_DIM = 16
 OUTPUT_DIM = 1
 NUM_LAYERS = 1
 
@@ -21,6 +21,7 @@ class LstmClassifier(nn.Module):
         self.num_layers = num_layers
 
         self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)
+        self.layer_norm = nn.LayerNorm(hidden_dim)
         self.linear = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x: Tensor) -> Tensor:
@@ -32,6 +33,8 @@ class LstmClassifier(nn.Module):
         ).to(x.device)
 
         x, _ = self.lstm(x, (h0, c0))  # (B, T, H)
+
+        x = self.layer_norm(x)  # (B, T, H)
 
         # get the last time step's output
         x = x[:, -1, :]  # (B, H)

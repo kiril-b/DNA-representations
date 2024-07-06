@@ -13,10 +13,11 @@ class CnnClassifier(nn.Module):
                 nn.Conv2d(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    kernel_size=3,
-                    padding=1,
+                    kernel_size=5,
+                    padding=2,
                 )
             )
+            layers.append(nn.BatchNorm2d(out_channels))
             layers.append(nn.ReLU())
             layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
             in_channels = out_channels
@@ -26,8 +27,10 @@ class CnnClassifier(nn.Module):
         # dense  layers
         self.fc_layers = nn.Sequential(
             nn.Linear(2 * 62 * 12, 128),
+            nn.BatchNorm1d(128),
             nn.ReLU(),
             nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
             nn.ReLU(),
             nn.Linear(64, 1),
             nn.Sigmoid(),
