@@ -6,7 +6,9 @@ pandas
 pydantic
 scikit-learn
 seaborn
+tbparse
 tensorboard
+tensorboard-plugin-customizable-plots
 torch
 torcheval
 torchinfo
